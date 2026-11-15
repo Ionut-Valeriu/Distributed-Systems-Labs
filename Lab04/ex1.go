@@ -1,4 +1,5 @@
 package main
+
 import (
 	"fmt"
 	"math/rand"
@@ -7,15 +8,15 @@ import (
 )
 
 type node struct {
-	in <-chan int
-	out chan<- int
-	index int
-	leader int
+	in      <-chan int
+	out     chan<- int
+	index   int
+	leader  int
 	isLider bool
-	wg *sync.WaitGroup
+	wg      *sync.WaitGroup
 }
 
-func (n node) start() {
+func (n *node) start() {
 	defer n.wg.Done()
 
 	n.out <- n.index
@@ -30,7 +31,7 @@ func (n node) start() {
 
 			n.leader = recv
 			n.out <- n.leader
-			fmt.Println(n.index,": recv:", recv, "lead:", n.leader)
+			fmt.Println(n.index, ": recv:", recv, "lead:", n.leader)
 		}
 	}
 
@@ -40,7 +41,7 @@ func (n node) start() {
 func main() {
 	var wg sync.WaitGroup
 	n := 10
-	nodes := make([]node, 0, n)
+	nodes := make([]*node, 0, n)
 	ids_used := make([]int, 0, n)
 
 	in := make(chan int, 1)
@@ -52,11 +53,11 @@ func main() {
 	for range n {
 		id := make_id(&ids_used)
 		crr_node := node{in, out, id, id, false, &wg}
-		nodes = append(nodes, crr_node)
+		nodes = append(nodes, &crr_node)
 		in = out
 		out = make(chan int, 1)
 	}
-	nodes[len(nodes) - 1].out = initial
+	nodes[len(nodes)-1].out = initial
 	fmt.Println("Ids", len(ids_used), ":", ids_used)
 
 	for _, crr_node := range nodes {
@@ -67,10 +68,10 @@ func main() {
 	fmt.Println("Done")
 }
 
-func make_id (ids_used *[]int) int {
+func make_id(ids_used *[]int) int {
 	maxim := 100
 	idx := rand.Intn(maxim)
-	
+
 	for slices.Contains(*ids_used, idx) {
 		idx = rand.Intn(maxim)
 	}

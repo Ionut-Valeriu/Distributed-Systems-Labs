@@ -1,4 +1,5 @@
 package main
+
 import (
 	"fmt"
 	"math/rand"
@@ -7,21 +8,21 @@ import (
 )
 
 type node struct {
-	in []<-chan int
-	out []chan<- int
-	id int
-	max_id int
+	in      []<-chan int
+	out     []chan<- int
+	id      int
+	max_id  int
 	isLider bool
-	rounds int
-	diam int
-	wg *sync.WaitGroup
+	rounds  int
+	diam    int
+	wg      *sync.WaitGroup
 }
 
-func (n node) start() {
+func (n *node) start() {
 	defer n.wg.Done()
 
 	for n.rounds != n.diam {
-		n.rounds ++
+		n.rounds++
 
 		for _, ch := range n.out {
 			ch <- n.max_id
@@ -43,13 +44,13 @@ func main() {
 	n := 5
 	diam := 3
 
-	nodes := make([]node, n)
+	nodes := make([]*node, n)
 	ids_used := make([]int, 0, n)
 
-	// init nodes 
+	// init nodes
 	for i := range n {
 		id := make_id(&ids_used)
-		nodes[i] = node{
+		nodes[i] = &node{
 			in:      make([]<-chan int, 0),
 			out:     make([]chan<- int, 0),
 			id:      id,
@@ -86,10 +87,10 @@ func main() {
 	fmt.Println("Done")
 }
 
-func make_id (ids_used *[]int) int {
+func make_id(ids_used *[]int) int {
 	maxim := 100
 	idx := rand.Intn(maxim)
-	
+
 	for slices.Contains(*ids_used, idx) {
 		idx = rand.Intn(maxim)
 	}
